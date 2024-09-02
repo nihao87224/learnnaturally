@@ -29,7 +29,10 @@ func main() {
 		if err := c.BindJSON(&prompt); err != nil {
 			log.Fatalf("Error binding JSON: %v", err)
 		}
-		remini.ChatAndProofread(prompt.Message, cfg.Common.ProxyUrl)
+		content := remini.ChatAndProofread(prompt.Message, cfg.Common.ProxyUrl)
+		c.JSON(200, gin.H{
+			"message": content,
+		})
 	})
 
 	err := router.Run("localhost:8091")

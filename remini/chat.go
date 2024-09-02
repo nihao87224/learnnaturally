@@ -8,7 +8,7 @@ import (
 	"log"
 )
 
-func ChatAndProofread(message string, proxyUrl string) {
+func ChatAndProofread(message string, proxyUrl string) []*genai.Content {
 	ctx := context.Background()
 	client, err := commands.MyGeminiClient(ctx, proxyUrl)
 	if err != nil {
@@ -19,12 +19,18 @@ func ChatAndProofread(message string, proxyUrl string) {
 	model := client.GenerativeModel("gemini-1.5-flash")
 	session := model.StartChat()
 	session.History = []*genai.Content{}
+
+	var respContentSlice []*genai.Content
 	resp, err := session.SendMessage(ctx, genai.Text(message))
 	if err != nil {
 		log.Fatalf("Error sending message: %v", err)
 	}
-
-	for _, part := range resp.Candidates[0].Content.Parts {
-		fmt.Printf("%v\n", part)
+	respContentSlice = append(respContentSlice, resp.Candidates[0].Content)
+	// grammar proofread
+	respNaturally, err := session.SendMessage(ctx, genai.Text(fmt.Sprintf("‘%s’,  make the phrase natural. ", message)))
+	if err != nil {
+		log.Fatalf("Error sending message: %v", err)
 	}
+	respContentSlice = append(respContentSlice, respNaturally.Candidates[0].Content)
+	return respContentSlice
 }
