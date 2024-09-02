@@ -35,7 +35,7 @@ func main() {
 		})
 	})
 
-	err := router.Run("localhost:8091")
+	err := router.Run("0.0.0.0:8091")
 	if err != nil {
 		log.Fatalf("Error starting server: %v", err)
 	}
